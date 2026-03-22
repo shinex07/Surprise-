@@ -22,7 +22,7 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  // 🎵 control music based on video state
+  // 🎵 pause/play based on video
   useEffect(() => {
     if (!playerRef.current) return;
 
@@ -38,27 +38,71 @@ function App() {
     );
   }, [isVideoPlaying]);
 
+  // 🔊 UNMUTE + FADE IN MUSIC (after user clicks Start)
+  const handleStart = () => {
+    if (!playerRef.current) return;
+
+    // small cinematic delay
+    setTimeout(() => {
+      playerRef.current.contentWindow.postMessage(
+        JSON.stringify({
+          event: "command",
+          func: "unMute",
+          args: [],
+        }),
+        "*"
+      );
+
+      // start low volume
+      playerRef.current.contentWindow.postMessage(
+        JSON.stringify({
+          event: "command",
+          func: "setVolume",
+          args: [20],
+        }),
+        "*"
+      );
+
+      // 🎚️ smooth volume ramp
+      let vol = 20;
+      const fade = setInterval(() => {
+        vol += 5;
+
+        playerRef.current.contentWindow.postMessage(
+          JSON.stringify({
+            event: "command",
+            func: "setVolume",
+            args: [vol],
+          }),
+          "*"
+        );
+
+        if (vol >= 70) clearInterval(fade);
+      }, 200);
+    }, 300);
+  };
+
   return (
     <div style={{ position: "relative" }}>
       {/* ✨ GLOBAL PARTICLES */}
       <Particles />
 
-      {/* 🎵 BACKGROUND MUSIC (hidden player) */}
+      {/* 🎵 BACKGROUND MUSIC (FIXED AUTOPLAY) */}
       <iframe
         ref={playerRef}
         width="0"
         height="0"
-        src="https://www.youtube.com/embed/UwADziEwCDE?autoplay=1&loop=1&playlist=UwADziEwCDE&enablejsapi=1"
+        src="https://www.youtube.com/embed/UwADziEwCDE?autoplay=1&mute=1&loop=1&playlist=UwADziEwCDE&enablejsapi=1"
         title="background music"
         frameBorder="0"
         allow="autoplay"
         style={{ position: "absolute", opacity: 0 }}
       />
 
-      {/* 🎬 SCREEN TRANSITIONS */}
+      {/* 🎬 SCREENS */}
       <div style={{ position: "relative", zIndex: 2 }}>
         <AnimatePresence mode="wait">
-          
+
           {/* LOADING */}
           {stage === -1 && (
             <motion.div
@@ -79,7 +123,10 @@ function App() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <Intro next={() => setStage(1)} />
+              <Intro
+                next={() => setStage(1)}
+                onStart={handleStart} // 👈 IMPORTANT
+              />
             </motion.div>
           )}
 
@@ -93,7 +140,6 @@ function App() {
             >
               <Journey
                 next={() => {
-                  // 🎵 ensure music resumes when leaving journey
                   setIsVideoPlaying(false);
                   setStage(2);
                 }}
@@ -110,7 +156,7 @@ function App() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <Final onEnter={() => setIsVideoPlaying(false)} />
+              <Final />
             </motion.div>
           )}
 
