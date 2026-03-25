@@ -4,54 +4,60 @@ import "./styles.css";
 export default function Particles() {
   const [particles, setParticles] = useState([]);
   const [sparks, setSparks] = useState([]);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [mouseX, setMouseX] = useState(0);
 
+  // ✨ Generate particles
   useEffect(() => {
-    const generated = Array.from({ length: 50 }).map(() => ({
+    const generated = Array.from({ length: 90 }).map((_, i) => ({
+      id: i,
       left: Math.random() * 100,
-      delay: Math.random() * 5,
-      size: Math.random() * 4 + 2,
-      duration: Math.random() * 6 + 6,
+      delay: Math.random() * 6,
+      size: Math.random() * 6 + 3,       // 3px–9px
+      duration: Math.random() * 5 + 7,   // 7s–12s
     }));
 
     setParticles(generated);
   }, []);
 
+  // 🖱️ mouse parallax (horizontal only, smoother)
   useEffect(() => {
     const handleMove = (e) => {
-      setMouse({
-        x: e.clientX,
-        y: e.clientY,
-      });
+      setMouseX(e.clientX);
     };
 
     window.addEventListener("mousemove", handleMove);
     return () => window.removeEventListener("mousemove", handleMove);
   }, []);
 
+  // 💥 click sparks (FIXED)
   const handleClick = (e) => {
-    const burst = Array.from({ length: 12 }).map((_, i) => ({
-      id: Math.random(),
+    const newBurst = Array.from({ length: 16 }).map((_, i) => ({
+      id: Date.now() + Math.random(), // UNIQUE id (IMPORTANT FIX)
       x: e.clientX,
       y: e.clientY,
-      angle: (Math.PI * 2 * i) / 12,
+      angle: (Math.PI * 2 * i) / 16,
     }));
 
-    setSparks((prev) => [...prev, ...burst]);
+    setSparks((prev) => [...prev, ...newBurst]);
 
+    // remove THIS burst only
     setTimeout(() => {
-      setSparks((prev) => prev.slice(burst.length));
+      setSparks((prev) =>
+        prev.filter((s) => !newBurst.find((b) => b.id === s.id))
+      );
     }, 700);
   };
 
   return (
     <div className="particles-layer" onClick={handleClick}>
-      {particles.map((p, i) => {
-        const offsetX = (mouse.x - window.innerWidth / 2) * 0.01;
+      
+      {/* ✨ FLOATING PARTICLES */}
+      {particles.map((p) => {
+        const offsetX = (mouseX - window.innerWidth / 2) * 0.015;
 
         return (
           <span
-            key={i}
+            key={p.id}
             className="particle"
             style={{
               left: `calc(${p.left}% + ${offsetX}px)`,
@@ -64,6 +70,7 @@ export default function Particles() {
         );
       })}
 
+      {/* 💥 SPARK BURSTS */}
       {sparks.map((s) => (
         <span
           key={s.id}
