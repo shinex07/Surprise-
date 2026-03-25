@@ -4,26 +4,32 @@ body {
   font-family: 'Quicksand', sans-serif;
   background: radial-gradient(circle at top, #0a0f2c, #000);
   color: white;
+
   overflow-x: hidden;
+
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ===== LAYOUT ===== */
+/* ===== ROOT LAYOUT ===== */
 .container {
-  position: relative;
-  z-index: 2;
-
-  min-height: 100dvh; /* ✅ FIX: dynamic viewport (mobile zoom issue solved) */
+  min-height: 100svh;
   width: 100%;
 
   display: flex;
   flex-direction: column;
+
   justify-content: center;
   align-items: center;
 
-  gap: 20px;
   text-align: center;
-  padding: 16px;
+
+  padding: 20px;
+
+  box-sizing: border-box;
+
+  /* 🔥 prevents weird shifting */
+  position: relative;
+  z-index: 2;
 }
 
 /* ===== TEXT ===== */
@@ -31,18 +37,24 @@ body {
   font-size: clamp(1.8rem, 5vw, 2.6rem);
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
+
+  margin: 0;
 }
 
 .text {
   font-size: clamp(1rem, 3.5vw, 1.2rem);
   max-width: 520px;
+
   line-height: 1.6;
+
+  margin: 0 auto;
 }
 
 /* ===== BUTTONS ===== */
 .btn {
   position: relative;
-  padding: 12px 24px;
+
+  padding: 12px 22px;
 
   background: linear-gradient(135deg, #4c6fff, #6f8fff);
   border: none;
@@ -56,6 +68,10 @@ body {
   font-weight: 600;
 
   transition: all 0.25s ease;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn:hover {
@@ -69,9 +85,13 @@ body {
 
 .nav-buttons {
   display: flex;
+  justify-content: center;
+  align-items: center;
+
   gap: 12px;
   flex-wrap: wrap;
-  justify-content: center;
+
+  width: 100%;
 }
 
 /* ===== BUTTON GLOWS ===== */
@@ -98,36 +118,46 @@ body {
   background: radial-gradient(circle, rgba(255, 200, 120, 0.4), transparent 70%);
 }
 
-/* ===== MEDIA WRAPPER (REAL FIX) ===== */
+/* ===== MEDIA WRAPPER ===== */
 .media-wrapper {
   width: 100%;
-  max-width: 900px; /* ✅ caps size on laptop */
+  max-width: 900px;
+
   display: flex;
   justify-content: center;
   align-items: center;
+
+  margin: 0 auto;
 }
 
 /* ===== MEDIA ===== */
-.media {
-  border-radius: 22px;
-  object-fit: cover;
+.media,
+.video {
+  display: block;
 
-  width: auto;
-  height: auto;
+  margin: 0 auto;
 
   max-width: 100%;
-  max-height: 70vh; /* ✅ prevents oversized images */
+  height: auto;
 
-  transition: all 0.4s ease;
+  border-radius: 22px;
 }
 
-/* portrait fix */
+/* image behaviour */
+.media {
+  object-fit: cover;
+  max-height: 70vh;
+
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* portrait */
 .portrait {
   max-height: 70vh;
   width: auto;
 }
 
-/* landscape fix */
+/* landscape */
 .landscape {
   width: 100%;
   height: auto;
@@ -135,12 +165,8 @@ body {
 
 /* video */
 .video {
-  width: 100%;
-  max-width: 900px;
   max-height: 70vh;
-
   object-fit: contain;
-  border-radius: 22px;
 
   box-shadow:
     0 0 25px rgba(100, 150, 255, 0.5),
@@ -172,21 +198,21 @@ body {
     0 0 80px rgba(255, 150, 200, 0.3);
 }
 
-/* ===== PARTICLES ===== */
+/* ===== PARTICLES (FIXED BACKGROUND) ===== */
 .particles-layer {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
+
   pointer-events: none;
-  z-index: 1  ;
+
+  z-index: 0; /* 🔥 below everything */
 }
 
 .particles-layer::after {
   content: "";
   position: absolute;
   inset: 0;
+
   background: radial-gradient(circle, transparent 60%, rgba(0,0,0,0.4));
 }
 
@@ -213,57 +239,37 @@ body {
 
 /* ===== LOADING ===== */
 .loading-container {
-  min-height: 100dvh;
+  min-height: 100svh;
+
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* ===== MOBILE FIX ===== */
-@media (max-width: 600px) {
-  .media {
-    max-height: 60vh; /* ✅ prevents zoom-out requirement */
-  }
-
-  .video {
-    max-height: 60vh;
-  }
-
-  .btn {
-    padding: 10px 18px;
-    font-size: 0.95rem;
-  }
-}
-
-/* ===== CURSOR ===== */
-.cursor {
-  margin-left: 4px;
-  animation: blink 1s infinite;
-  color: #ffe27a;
-}
-
-@keyframes blink {
-  0%, 50%, 100% { opacity: 1; }
-  25%, 75% { opacity: 0; }
-}
-/* 🔥 progress bar */
+/* ===== PROGRESS ===== */
 .progress-container {
   position: fixed;
   top: 0;
   left: 0;
+
   width: 100%;
   height: 4px;
+
   background: rgba(255,255,255,0.08);
-  z-index: 5;
+  z-index: 10;
 }
 
 .progress-bar {
   height: 100%;
   background: linear-gradient(90deg, #ffe27a, #ffb347);
+
   transition: width 0.1s linear;
 }
+
+/* ===== SPARKS ===== */
 .spark {
   position: absolute;
+
   width: 4px;
   height: 14px;
 
@@ -277,6 +283,7 @@ body {
     0 0 16px rgba(255, 180, 80, 0.6);
 
   transform-origin: center;
+
   animation: sparkMove 0.7s ease-out forwards;
 }
 
@@ -285,9 +292,28 @@ body {
     opacity: 1;
     transform: scale(1) rotate(var(--angle)) translateY(0);
   }
-
   100% {
     opacity: 0;
     transform: scale(0.5) rotate(var(--angle)) translateY(-60px);
+  }
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 600px) {
+  .media {
+    max-height: 60vh;
+  }
+
+  .video {
+    max-height: 60vh;
+  }
+
+  .btn {
+    padding: 10px 18px;
+    font-size: 0.95rem;
+  }
+
+  .text {
+    max-width: 90%;
   }
 }
